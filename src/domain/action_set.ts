@@ -1,7 +1,4 @@
-export interface Action {
-    name: string;
-    params: string[];
-}
+export type Action = Record<string, string>;
 
 export interface ActionSet {
     _id: string;

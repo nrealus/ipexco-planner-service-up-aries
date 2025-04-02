@@ -125,7 +125,7 @@ function runPlanner(plan_run: PlanRun, job: Job<any>): Promise<boolean> {
   }
 
   
-function get_plan(plan_run: PlanRun): Record<string, string>[] {
+function get_plan(plan_run: PlanRun): Action[] {
   if(plan_run.status != PlanRunStatus.SOLVED){
     return null
   }
@@ -133,7 +133,7 @@ function get_plan(plan_run: PlanRun): Record<string, string>[] {
   let plan_path = plan_run.experiment_path + '/plan/plan.json'
 
   let raw_plan = fs.readFileSync(plan_path,'utf8');
-  let actions: Record<string, string>[] = JSON.parse(raw_plan);
+  let actions: Action[] = JSON.parse(raw_plan);
 
   if(process.env.DEBUG_OUTPUT === 'true'){
     console.log(actions)

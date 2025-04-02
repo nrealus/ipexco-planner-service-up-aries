@@ -1,6 +1,6 @@
 
 import fs from 'fs'
-import { PlanningModel, toPDDL_domain, toPDDL_problem } from '../domain/pddl';
+import { PlanningModel } from '../domain/model';
 import { PlanProperty } from '../domain/plan_property';
 import { json } from 'stream/consumers';
 
