@@ -10,7 +10,7 @@ the planner in a docker container.
 To build the docker image yourself run:
 
 ```
-docker build -t planner-service-up-aries .
+docker build -t ipexco-planner-service-up-aries .
 ```
 
 ### Dependencies
