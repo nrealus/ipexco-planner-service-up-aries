@@ -21,29 +21,39 @@ if __name__ == "__main__":
     rust_binary_path = os.path.abspath(".") # os.path.abspath(sys.path[0])
 
     if sys.argv[1] == "solve":
-        #initial_state_filename = './separated_jsons/test_instance_init_state.json'
-        #specifications_filename = './separated_jsons/test_instance_specifications.json'
-        #test_pb_def = parse_specifications_and_initial_state(initial_state_filename, specifications_filename)
-
-        full_problem_filename = sys.argv[2]
-        test_pb_def = parse_problem_full(full_problem_filename)
+        initial_state_filename = sys.argv[2]
+        additional_properties_filename = sys.argv[3]
+        test_pb_def = parse_problem_with_additional_properties(initial_state_filename, additional_properties_filename)
+        print(test_pb_def)
+        # full_problem_filename = sys.argv[2]
+        # test_pb_def = parse_problem_full(full_problem_filename)
         # print(test_pb_def)
 
         # # # # with fixed num of allowed_swaps # # # 
         # 
         # num_available_swaps = 3
-        # test_beluga_model = BelugaModel(test_pb_def, full_problem_filename, num_available_swaps, None)
+        # test_beluga_model = BelugaModel(
+        #     test_pb_def,
+        #     initial_state_filename+"_"+additional_properties_filename,
+        #     num_available_swaps,
+        #     None,
+        # )
         # serialize_problem(test_beluga_model.pb, output_upp_path)
         # (test_plan, test_plan_as_json) = test_beluga_model.solve()
 
         # # # with growing num of allowed_swaps (until limit or sol found) # # # 
     
         max_num_available_swaps = int(os.environ['MAX_NUM_AVAILABLE_SWAPS']) # int(os.environ.get('MAX_NUM_AVAILABLE_SWAPS', 10))
-        num_available_swaps = 2
+        num_available_swaps = 0
         while True:
             print('available swaps "spawned": {}'.format(num_available_swaps))
         
-            test_beluga_model = BelugaModel(test_pb_def, full_problem_filename, num_available_swaps, None)
+            test_beluga_model = BelugaModel(
+                test_pb_def,
+                initial_state_filename+"_"+additional_properties_filename,
+                num_available_swaps,
+                None,
+            )
             (test_plan, test_plan_as_json) = test_beluga_model.solve()
         
             if test_plan is not None:

@@ -1,5 +1,6 @@
 export interface PlanProperty {
     _id?: string;
+    definition: unknown;
     name: string;
     project: string;
     type: string;

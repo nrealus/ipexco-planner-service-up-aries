@@ -126,8 +126,11 @@ def _parse_problem(d) -> BelugaProblemDef:
 
 # # # 
 
-def parse_problem_specs_and_init_state(initial_state_filename: str, specifications_filename: str):
-    with open(initial_state_filename) as f:
+def parse_problem_with_additional_properties(problem_filename: str, additional_properties_filename: str):
+    production_lines: list[ProductionLine] = []
+    flights: list[Flight] = []
+
+    with open(problem_filename) as f:
         d = json.load(f, object_hook=lambda d: SimpleNamespace(**d))
         trailers_beluga=[t.name for t in d.trailers_beluga]
         trailers_factory=[t.name for t in d.trailers_factory]
@@ -135,11 +138,9 @@ def parse_problem_specs_and_init_state(initial_state_filename: str, specificatio
         jig_types=[JigType(jt.name, jt.size_empty, jt.size_loaded) for jt in vars(d.jig_types).values()]
         racks=[Rack(r.name, r.size, r.jigs) for r in d.racks]
         jigs=[Jig(r.name, r.type, r.empty) for r in vars(d.jigs).values()]
-        #production_lines=[ProductionLine(r.name, {i:a for (i,a) in enumerate(r.schedule)}) for r in d.production_lines],
-        #flights=[Flight(r.name, {i:a for (i,a) in enumerate(r.incoming)}, {i:a for (i,a) in enumerate(r.outgoing)}) for r in d.flights],
+        production_lines=[ProductionLine(r.name, {i:a for (i,a) in enumerate(r.schedule)}) for r in d.production_lines]
+        flights=[Flight(r.name, {i:a for (i,a) in enumerate(r.incoming)}, {i:a for (i,a) in enumerate(r.outgoing)}) for r in d.flights]
 
-    production_lines: list[ProductionLine] = []
-    flights: list[Flight] = []
     _flights: list[tuple[int, Flight]] = []
     rack_always_empty: list[str] = []
     use_at_least_one_rack_always_empty: bool = False
@@ -149,7 +150,7 @@ def parse_problem_specs_and_init_state(initial_state_filename: str, specificatio
     def beluga_name(i):
         return "beluga"+str(i+1)
 
-    with open(specifications_filename) as f:
+    with open(additional_properties_filename) as f:
         d = json.load(f)
 
         for property_w_id in d:
@@ -158,7 +159,7 @@ def parse_problem_specs_and_init_state(initial_state_filename: str, specificatio
             name, params = property_w_id["definition"]["name"], property_w_id["definition"]["parameters"]
             
             if name == "unload_beluga":
-                jig, i_beluga, i_unloading = params[0], params[1], params[2]
+                jig, i_beluga, i_unloading = params[0], int(params[1]), int(params[2])
                 fl = None
                 #for fl_ in flights:
                 #    if fl_.name == beluga:
@@ -173,6 +174,7 @@ def parse_problem_specs_and_init_state(initial_state_filename: str, specificatio
                 for (ii, fl_) in _flights:
                     if ii == i_beluga:
                         fl = fl_
+                        fl.incoming = { (k if k < i_unloading else k+1):v for k,v in fl.incoming.items() }
                         assert i_unloading not in fl.incoming
                         fl.incoming[i_unloading] = jig
                         break
@@ -184,7 +186,7 @@ def parse_problem_specs_and_init_state(initial_state_filename: str, specificatio
 
             elif name == "load_beluga":
                 # !! TODO FIXME !! Allow individual jig object, not just jig type ? (for loading)
-                jig, i_beluga, i_loading = params[0], params[1], params[2]
+                jig, i_beluga, i_loading = params[0], int(params[1]), int(params[2])
                 fl = None
                 #for fl_ in flights:
                 #    if fl_.name == beluga:
@@ -199,6 +201,7 @@ def parse_problem_specs_and_init_state(initial_state_filename: str, specificatio
                 for (ii, fl_) in _flights:
                     if ii == i_beluga:
                         fl = fl_
+                        fl.outgoing = { (k if k < i_loading else k+1):v for k,v in fl.outgoing.items() }
                         assert i_loading not in fl.outgoing
                         fl.outgoing[i_loading] = jig
                         break
@@ -209,11 +212,13 @@ def parse_problem_specs_and_init_state(initial_state_filename: str, specificatio
                 flights = [fl for (_, fl) in _flights]
 
             elif name == "deliver_to_production_line":
-                jig, pl_name, i = params[0], params[1], params[2]
+                jig, pl_name, i = params[0], params[1], int(params[2])
                 pl = None
                 for pl_ in production_lines:
                     if pl_.name in pl_name:
                         pl = pl_
+                        pl.schedule = { (k if k < i else k+1):v for k,v in pl.schedule.items() }
+                        assert i not in pl.schedule
                         pl.schedule[i] = jig
                         break
                 if pl is None:

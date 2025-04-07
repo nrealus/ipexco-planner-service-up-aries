@@ -803,6 +803,7 @@ class BelugaModel:
         if len(flights.incoming) == 0:
             return None
 
+        unload_st = None
         prev_unload_st = None
         for _, jig_name in flights.incoming.items():
 

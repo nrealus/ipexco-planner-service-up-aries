@@ -3,6 +3,7 @@ import fs from 'fs'
 import { PlanningModel } from '../domain/model';
 import { PlanProperty } from '../domain/plan_property';
 import { json } from 'stream/consumers';
+import assert from 'assert';
 
 export interface GoalDefinition {
     plan_properties: PlanProperty[],
@@ -14,8 +15,17 @@ export function setupExperimentEnvironment(model: PlanningModel, goalDefinition:
 
     fs.mkdirSync(expFolder);
 
-    const full_problem_path = expFolder + '/problem_def.json'
-    fs.writeFileSync(full_problem_path, JSON.stringify(model))
+    const problem_path = expFolder + '/problem_def.json'
+    fs.writeFileSync(problem_path, JSON.stringify(model))
+
+    const additional_properties = goalDefinition.plan_properties.filter((item) => goalDefinition.hard_goals.includes(item._id)).map((item) => item);
+    assert(goalDefinition.soft_goals.length == 0);
+
+    const additional_properties_path = expFolder + '/additional_properties_def.json'
+    fs.writeFileSync(
+        additional_properties_path,
+        JSON.stringify(additional_properties),
+    )
 
 }
 

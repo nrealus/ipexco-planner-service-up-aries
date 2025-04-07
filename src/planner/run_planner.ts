@@ -15,7 +15,8 @@ export function create_temp_goal_plan_run(request: PlannerRequest): PlanRun {
     planner: process.env.PLANNER_SERVICE_PLANNER,
     args: [
       'solve',
-      'problem_def.json'
+      'problem_def.json',
+      'additional_properties_def.json',
     ]
   }
 }
