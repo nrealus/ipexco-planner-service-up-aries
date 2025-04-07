@@ -3,6 +3,8 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update
 RUN apt-get upgrade -y
+RUN apt-get update
+RUN apt-get upgrade -y
 
 # Python
 RUN apt-get remove -y python3.12
